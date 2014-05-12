@@ -20,11 +20,11 @@ source $bp_dir/bin/common.sh
 
 # Node Installation --------------------------
 status "Installing Node and bower dependencies..."
-mv $bp_dir/vendor/package-bower.json $NODE_BUILD_DIR/package.json
 NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
 NODE_BUILD_DIR=$(mktemp -d -t node_build.XXXXXX)
 git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
 chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
+mv $bp_dir/vendor/package-bower.json $NODE_BUILD_DIR/package.json
 $NODE_BUILDPACK_DIR/bin/compile $NODE_BUILD_DIR $cache_dir
 echo "done." | indent
 
