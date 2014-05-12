@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+set -e            # fail fast
+set -o pipefail   # don't ignore exit codes when piping output
+# set -x          # enable debugging
+
+# Configure directories
+build_dir=$1
+cache_dir=$2
+env_dir=$3
+
+bp_dir=$(cd $(dirname $0); cd ..; pwd)
+
+# clean up leaking environment
+unset GIT_DIR
+
+# Load some convenience functions like status(), echo(), and indent()
+source $bp_dir/bin/common.sh
+
+# Node Installation --------------------------
+status "Installing Node and bower dependencies..."
+mv $bp_dir/vendor/package-bower.json $NODE_BUILD_DIR/package.json
+NODE_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
+NODE_BUILD_DIR=$(mktemp -d -t node_build.XXXXXX)
+git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
+chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
+$NODE_BUILDPACK_DIR/bin/compile $NODE_BUILD_DIR $cache_dir
+export PATH=$NODE_BUILD_DIR/vendor/node/bin:$NODE_BUILD_DIR/bin:$NODE_BUILD_DIR/node_modules/.bin:$PATH
+echo "done." | indent
+
+status "Installing components using Bower..."
+$curr_dir=$(pwd)
+cd $build_dir
+bower install
+cd $curr_dir
+
+if [ -f $build_dir/_static.cfg ]; then
+  status "Initializing Static Server..."
+  STATIC_BUILDPACK_DIR=$(mktemp -d -t node.XXXXXX)
+  git clone --quiet https://github.com/abhishekmunie/heroku-buildpack-static.git $STATIC_BUILDPACK_DIR
+  chmod -f +x $STATIC_BUILDPACK_DIR/bin/{detect,compile,release} || true
+  $STATIC_BUILDPACK_DIR/bin/compile $build_dir $cache_dir
+  rm -fr $STATIC_BUILDPACK_DIR
+fi
+
+# Cleanup ------------------------------------
+rm -fr $NODE_BUILDPACK_DIR
+rm -fr $NODE_BUILD_DIR
+rm -fr $STATIC_BUILDPACK_DIR
