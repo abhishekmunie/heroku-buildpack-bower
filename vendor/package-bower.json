@@ -5,7 +5,6 @@
     "node": "0.10.x"
   },
   "dependencies": {
-    "coffee-script": "latest",
-    "bower": "latest"
+    "bower": "1.x.x"
   }
 }
