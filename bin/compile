@@ -31,7 +31,8 @@ echo "done." | indent
 status "Installing components using Bower..."
 curr_dir=$(pwd)
 cd $build_dir
-PATH=$NODE_BUILD_DIR/vendor/node/bin:$NODE_BUILD_DIR/bin:$NODE_BUILD_DIR/node_modules/.bin:$PATH bower install
+PATH=$NODE_BUILD_DIR/vendor/node/bin:$NODE_BUILD_DIR/bin:$NODE_BUILD_DIR/node_modules/.bin:$PATH bower install | indent
+echo "done." | indent
 cd $curr_dir
 
 if [ -f $build_dir/_static.cfg ]; then
