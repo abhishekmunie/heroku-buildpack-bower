@@ -26,13 +26,12 @@ NODE_BUILD_DIR=$(mktemp -d -t node_build.XXXXXX)
 git clone --quiet https://github.com/heroku/heroku-buildpack-nodejs.git $NODE_BUILDPACK_DIR
 chmod -f +x $NODE_BUILDPACK_DIR/bin/{detect,compile,release} || true
 $NODE_BUILDPACK_DIR/bin/compile $NODE_BUILD_DIR $cache_dir
-export PATH=$NODE_BUILD_DIR/vendor/node/bin:$NODE_BUILD_DIR/bin:$NODE_BUILD_DIR/node_modules/.bin:$PATH
 echo "done." | indent
 
 status "Installing components using Bower..."
 $curr_dir=$(pwd)
 cd $build_dir
-bower install
+PATH=$NODE_BUILD_DIR/vendor/node/bin:$NODE_BUILD_DIR/bin:$NODE_BUILD_DIR/node_modules/.bin:$PATH bower install
 cd $curr_dir
 
 if [ -f $build_dir/_static.cfg ]; then
